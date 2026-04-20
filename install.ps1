@@ -5,13 +5,13 @@
   Ensures git + Python 3.11 are installed (via winget), creates a venv in
   .\bridge\.venv, installs Python deps, and launches bridge.installer.
   Safe to rerun.
-.PARAMETER Args
+.PARAMETER PassThruArgs
   Forwarded to the Python installer (e.g. --force, --phase detect).
 #>
 [CmdletBinding()]
 param(
     [Parameter(ValueFromRemainingArguments = $true)]
-    [string[]]$Args
+    [string[]]$PassThruArgs
 )
 
 $ErrorActionPreference = "Stop"
@@ -86,5 +86,5 @@ if (Test-Path $StateFile) {
 
 # --- 6. Launch installer ---
 Write-Host "[bridge] launching installer..."
-& $VenvPy -m bridge.installer @Args
+& $VenvPy -m bridge.installer @PassThruArgs
 exit $LASTEXITCODE
