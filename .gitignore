@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+bridge/.venv/
+*.egg-info/
+.pytest_cache/
+
+# Wrapper state & vendored third-party code
+state.json
+vendor/
+bridge/logs/
+*.log

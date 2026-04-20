@@ -1,0 +1,9 @@
+[project]
+name = "stash-plex-bridge"
+version = "0.1.0"
+description = "Automated installer for three Stash/Plex bridge plugins"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
