@@ -15,7 +15,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ProjectRoot = $PSScriptRoot
 Set-Location $ProjectRoot
 
 function Has-Command($name) {
@@ -36,22 +36,31 @@ function Install-ViaWinget($id, $friendly) {
 # --- 1. Ensure git ---
 if (-not (Has-Command git)) {
     Install-ViaWinget "Git.Git" "Git"
+    if (-not (Has-Command git)) {
+        throw "git still not on PATH after winget install. Try re-opening PowerShell."
+    }
 }
 
 # --- 2. Ensure python ---
-$python = $null
-foreach ($cmd in @("python", "py")) {
-    if (Has-Command $cmd) {
-        $ver = & $cmd --version 2>&1
-        if ($ver -match "Python 3\.(1[0-9]|[2-9][0-9])") {
-            $python = $cmd
-            break
+function Find-Python {
+    foreach ($cmd in @("python", "py")) {
+        if (Has-Command $cmd) {
+            $ver = & $cmd --version 2>&1
+            if ($ver -match "Python 3\.(1[0-9]|[2-9][0-9])") {
+                return $cmd
+            }
         }
     }
+    return $null
 }
+
+$python = Find-Python
 if (-not $python) {
     Install-ViaWinget "Python.Python.3.11" "Python 3.11"
-    $python = "python"
+    $python = Find-Python
+    if (-not $python) {
+        throw "Python 3.10+ still not on PATH after winget install. Try re-opening PowerShell."
+    }
 }
 
 # --- 3. Create venv ---
@@ -81,7 +90,8 @@ if ($CurrentHash -ne $PrevHash) {
 # --- 5. Lock down state.json ACL if it exists ---
 $StateFile = Join-Path $ProjectRoot "state.json"
 if (Test-Path $StateFile) {
-    icacls $StateFile /inheritance:r /grant:r "$env:USERNAME:F" | Out-Null
+    $GrantArg = '{0}:F' -f $env:USERNAME
+    icacls $StateFile /inheritance:r /grant:r $GrantArg | Out-Null
 }
 
 # --- 6. Launch installer ---
