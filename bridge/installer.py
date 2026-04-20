@@ -139,6 +139,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         else:
             stash_plugins = Path(state.get_path("stash_plugins") or "")
             plex_plugins = Path(state.get_path("plex_plugins") or "")
+        if not stash_plugins.is_absolute() or not plex_plugins.is_absolute():
+            raise RuntimeError(
+                "Plugin paths not resolved — run the detect phase first "
+                "(e.g. `install.ps1 --phase detect`)."
+            )
         targets = InstallTargets(
             stash_plugins=stash_plugins,
             plex_plugins=plex_plugins,

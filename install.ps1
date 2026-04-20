@@ -87,14 +87,16 @@ if ($CurrentHash -ne $PrevHash) {
     Write-Host "[bridge] deps up to date"
 }
 
-# --- 5. Lock down state.json ACL if it exists ---
+# --- 5. Launch installer ---
+Write-Host "[bridge] launching installer..."
+& $VenvPy -m bridge.installer @PassThruArgs
+$InstallerExit = $LASTEXITCODE
+
+# --- 6. Lock down state.json ACL now that it exists ---
 $StateFile = Join-Path $ProjectRoot "state.json"
 if (Test-Path $StateFile) {
     $GrantArg = '{0}:F' -f $env:USERNAME
     icacls $StateFile /inheritance:r /grant:r $GrantArg | Out-Null
 }
 
-# --- 6. Launch installer ---
-Write-Host "[bridge] launching installer..."
-& $VenvPy -m bridge.installer @PassThruArgs
-exit $LASTEXITCODE
+exit $InstallerExit

@@ -57,11 +57,12 @@ def install_stashplexagent(vendor_dir: Path, plex_plugins: Path) -> Path:
 def write_run_sync_script(project_root: Path, vendor_dir: Path) -> Path:
     script = project_root / "run-sync.ps1"
     rel_vendor = vendor_dir / "Stash2Plex"
+    venv_py = project_root / "bridge" / ".venv" / "Scripts" / "python.exe"
     content = f"""# Run Stash2Plex one-shot sync
 $ErrorActionPreference = "Stop"
 Push-Location "{rel_vendor}"
 try {{
-    & python sync.py @args
+    & "{venv_py}" sync.py @args
 }} finally {{
     Pop-Location
 }}
