@@ -68,7 +68,7 @@ jobs:
           Add-Content SHA256SUMS.txt "$h  stash-plex-bridge-source.zip"
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             install.ps1
