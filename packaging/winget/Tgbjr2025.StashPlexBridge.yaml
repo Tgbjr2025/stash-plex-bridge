@@ -1,0 +1,28 @@
+PackageIdentifier: Tgbjr2025.StashPlexBridge
+PackageVersion: 1.0.0
+PackageLocale: en-US
+Publisher: DOMINUS AXIS
+PublisherUrl: https://dominusaxis.com
+PublisherSupportUrl: https://github.com/Tgbjr2025/stash-plex-bridge/issues
+PackageName: Stash-Plex Bridge
+PackageUrl: https://github.com/Tgbjr2025/stash-plex-bridge
+License: MIT
+LicenseUrl: https://github.com/Tgbjr2025/stash-plex-bridge/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Thomas Bateman / DOMINUS AXIS
+ShortDescription: One-command Windows installer for three Stash↔Plex bridge plugins.
+Description: |
+  stash-plex-bridge wires three Stash↔Plex synchronisation plugins
+  (Stash2Plex, PlexSync, StashPlexAgent.bundle) into one idempotent,
+  re-runnable PowerShell installer. Detects Stash and Plex installs,
+  extracts tokens, renders per-plugin configs, and validates the
+  end-to-end pipeline.
+Tags:
+  - stash
+  - plex
+  - media-server
+  - sync
+  - installer
+  - powershell
+Moniker: stash-plex-bridge
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

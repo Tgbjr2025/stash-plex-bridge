@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>stash-plex-bridge</id>
+    <version>1.0.0</version>
+    <packageSourceUrl>https://github.com/Tgbjr2025/stash-plex-bridge</packageSourceUrl>
+    <owners>Tgbjr2025</owners>
+    <title>Stash-Plex Bridge</title>
+    <authors>Thomas Bateman / DOMINUS AXIS</authors>
+    <projectUrl>https://github.com/Tgbjr2025/stash-plex-bridge</projectUrl>
+    <iconUrl>https://github.com/Tgbjr2025.png</iconUrl>
+    <copyright>2026 Thomas Bateman / DOMINUS AXIS</copyright>
+    <licenseUrl>https://github.com/Tgbjr2025/stash-plex-bridge/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/Tgbjr2025/stash-plex-bridge</projectSourceUrl>
+    <docsUrl>https://github.com/Tgbjr2025/stash-plex-bridge#readme</docsUrl>
+    <bugTrackerUrl>https://github.com/Tgbjr2025/stash-plex-bridge/issues</bugTrackerUrl>
+    <tags>stash plex media-server sync installer powershell</tags>
+    <summary>One-command Windows installer for three Stash↔Plex bridge plugins.</summary>
+    <description>
+Wires three Stash↔Plex synchronisation plugins (Stash2Plex, PlexSync, StashPlexAgent.bundle) into one idempotent PowerShell installer. Detects Stash and Plex installs, extracts tokens, renders per-plugin configs, and validates the end-to-end pipeline. Safe to rerun.
+    </description>
+    <releaseNotes>https://github.com/Tgbjr2025/stash-plex-bridge/releases/tag/v1.0.0</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  sign-and-release:
+    name: Sign, Attest, and Release
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create self-signed Authenticode cert
+        id: cert
+        shell: pwsh
+        run: |
+          $cert = New-SelfSignedCertificate `
+            -Subject "CN=DOMINUS AXIS, O=DOMINUS AXIS, C=US" `
+            -Type CodeSigningCert `
+            -KeyAlgorithm RSA `
+            -KeyLength 4096 `
+            -HashAlgorithm SHA256 `
+            -CertStoreLocation "Cert:\CurrentUser\My" `
+            -NotAfter (Get-Date).AddYears(3)
+          $thumb = $cert.Thumbprint
+          echo "thumbprint=$thumb" >> $env:GITHUB_OUTPUT
+          # Export public cert for release
+          Export-Certificate -Cert $cert -FilePath publisher.cer | Out-Null
+
+      - name: Sign install.ps1 (Authenticode)
+        shell: pwsh
+        run: |
+          $cert = Get-ChildItem "Cert:\CurrentUser\My\${{ steps.cert.outputs.thumbprint }}"
+          Set-AuthenticodeSignature `
+            -FilePath install.ps1 `
+            -Certificate $cert `
+            -HashAlgorithm SHA256 `
+            -TimestampServer "http://timestamp.digicert.com"
+          Get-AuthenticodeSignature install.ps1
+
+      - name: Generate SHA256SUMS
+        shell: pwsh
+        run: |
+          $files = @('install.ps1', 'publisher.cer')
+          $hashes = foreach ($f in $files) {
+            if (Test-Path $f) {
+              $h = (Get-FileHash $f -Algorithm SHA256).Hash.ToLower()
+              "$h  $f"
+            }
+          }
+          $hashes | Out-File -FilePath SHA256SUMS.txt -Encoding ascii
+          Get-Content SHA256SUMS.txt
+
+      - name: Build source bundle
+        shell: pwsh
+        run: |
+          Compress-Archive -Path bridge, templates, install.ps1, requirements.txt, pyproject.toml, README.md, LICENSE `
+            -DestinationPath "stash-plex-bridge-source.zip"
+          $h = (Get-FileHash stash-plex-bridge-source.zip -Algorithm SHA256).Hash.ToLower()
+          Add-Content SHA256SUMS.txt "$h  stash-plex-bridge-source.zip"
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            install.ps1
+            stash-plex-bridge-source.zip
+            SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            install.ps1
+            stash-plex-bridge-source.zip
+            SHA256SUMS.txt
+            publisher.cer
+          generate_release_notes: true
+          body: |
+            ## stash-plex-bridge ${{ github.ref_name }}
+
+            ### Integrity
+            - `SHA256SUMS.txt` — verify with `sha256sum -c SHA256SUMS.txt` (Linux/macOS) or `Get-FileHash` (Windows)
+            - Build provenance attested via [sigstore](https://www.sigstore.dev/) — see the Attestations tab on this release
+            - Commits signed by maintainer GPG key `45E3BABE58983A29`
+
+            ### Installer signing
+            `install.ps1` is Authenticode-signed with a self-signed certificate (`publisher.cer` attached). Works with `Set-ExecutionPolicy RemoteSigned`. For full Windows trust without prompts, install via winget / Chocolatey / Scoop (manifests coming) or wait for SignPath.io OSS approval.
+
+            ### Verify the signature
+            ```powershell
+            Get-AuthenticodeSignature install.ps1
+            ```
+
+            ### Install
+            ```powershell
+            Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+            .\install.ps1
+            ```
